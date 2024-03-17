@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 @RestController
 public class SpeechAnalyzeController {
+
     @Value("${azure.speech.subscription-key}")
     private String subscriptionKey;
     @Value("${azure.speech.region}")
