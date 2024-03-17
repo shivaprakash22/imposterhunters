@@ -9,6 +9,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
+import com.wellsfargo.imposterhunters.imposterhunters.SpeechAnalyzeResponse;
 import javazoom.jl.converter.Converter;
 import javazoom.jl.decoder.JavaLayerException;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,9 +35,16 @@ public class SpeechAnalyzeController {
     private String apiKey;
 
 
+    @PostMapping("/ping")
+    public String pingurl(){
+        return "Success";
+    }
+
     @PostMapping("/voice/analyze")
-    public String analyzeAudio(@RequestParam("file") MultipartFile file) {
+    public SpeechAnalyzeResponse analyzeAudio(@RequestParam("file") MultipartFile file) {
         String analyseText=null;
+        String textanalayse=null;
+        SpeechAnalyzeResponse speechAnalyzeResponse= new SpeechAnalyzeResponse();
         try {
             File audioFile=null;
 
@@ -54,7 +62,7 @@ public class SpeechAnalyzeController {
             SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
             Future<SpeechRecognitionResult> task = recognizer.recognizeOnceAsync();
             SpeechRecognitionResult result = task.get();
-            String textanalayse= result.getText();
+             textanalayse= result.getText();
             System.out.println("Resutlt:"+textanalayse);
 
 
@@ -71,24 +79,23 @@ public class SpeechAnalyzeController {
             System.out.println("positiveScore"+positiveScore);
             System.out.println("negativeScore"+negativeScore);
             System.out.println("neutralScore"+neutralScore);
-
             // Analyze emotional tone probability
             String emotionalTone = null;
             //String emotionalTone = analyzeEmotionalTone(result);
-            System.out.println("Reaosn"+result.getReason());
+            System.out.println("Reason"+result.getReason());
 
+            speechAnalyzeResponse.setNegativescore(negativeScore);
+            speechAnalyzeResponse.setPositivescore(positiveScore);
+            speechAnalyzeResponse.setNeutralscore(positiveScore);
+            speechAnalyzeResponse.setText(textanalayse);
+            speechAnalyzeResponse.setStatus("success");
 
-//            // Classify recognized text as human or AI-generated
-//            if (result.getReason() == ResultReason.RecognizedSpeech) {
-//                return "Human, Emotional Tone: " + emotionalTone;
-//            } else {
-//                return "Unknown";
-//            }
         } catch (Exception ex) {
             ex.printStackTrace();
-            return "Error";
+            speechAnalyzeResponse.setStatus("Error in processing");
+            return speechAnalyzeResponse;
         }
-        return analyseText;
+        return speechAnalyzeResponse;
     }
 
 
